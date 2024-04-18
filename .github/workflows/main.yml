@@ -102,6 +102,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
     - name: Download .so file
       uses: actions/download-artifact@v3
       with:
@@ -141,7 +144,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: BuildTest
     container:
-      image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME2 | lower }}:main
+      image: ghcr.io/OmarSiwy/gRPCNvidia/test:main
 
     steps:
       - name: Checkout repository
@@ -149,6 +152,7 @@ jobs:
 
       - name: Set ownership
         run: |
+          # Workaround for https://github.com/actions/runner/issues/2033
           chown -R $(id -u):$(id -g) $PWD
 
       - name: Set up Docker Buildx
