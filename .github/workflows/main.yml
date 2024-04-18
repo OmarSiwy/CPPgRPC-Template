@@ -139,6 +139,9 @@ jobs:
           # Workaround for https://github.com/actions/runner/issues/2033
           chown -R $(id -u):$(id -g) $PWD
 
+      - name: List directory contents
+        run: ls -alh
+
       - name: Run Google Test
         run: |
           cd build && ctest
