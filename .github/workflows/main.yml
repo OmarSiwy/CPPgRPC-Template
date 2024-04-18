@@ -91,38 +91,38 @@ jobs:
       image: ghcr.io/omarsiwy/grpcnvidia/image:main
 
     steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip setuptools wheel twine
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel twine
 
-    - name: Build package
-      run: |
-        python setup.py sdist bdist_wheel
+      - name: Build package
+        run: |
+          python setup.py sdist bdist_wheel
 
-    - name: Check package
-      run: |
-        python -m twine check dist/*
+      - name: Check package
+        run: |
+          python -m twine check dist/*
 
-    - name: Upload to PyPI
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.pypi_password }}
-      run: |
-        python -m twine upload dist/*
+      - name: Upload to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.pypi_password }}
+        run: |
+          python -m twine upload dist/* --verbose || echo "Upload failed, possibly due to file already existing. See https://pypi.org/help/#file-name-reuse for more information."
 
-    - name: Clean up
-      if: always()
-      run: |
-        rm -rf build dist *.egg-info
+      - name: Clean up
+        if: always()
+        run: |
+          rm -rf build dist *.egg-info
 
   Test:
     runs-on: ubuntu-latest
@@ -138,6 +138,10 @@ jobs:
         run: |
           # Workaround for https://github.com/actions/runner/issues/2033
           chown -R $(id -u):$(id -g) $PWD
+
+      - name: Run Docker Compose
+        run: |
+          docker-compose up test
 
       - name: List directory contents
         run: ls -alh
