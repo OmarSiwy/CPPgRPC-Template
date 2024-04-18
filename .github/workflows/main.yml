@@ -4,11 +4,9 @@ on:
   push:
   pull_request:
 
+
 env:
   REGISTRY: ghcr.io
-  # Convert GitHub repository names to lowercase
-  IMAGE_NAME: ${{ github.repository }}/image
-  IMAGE_NAME2: ${{ github.repository }}/test
 
 jobs:
   BuildImage:
@@ -21,6 +19,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: Set environment variables
+      run: |
+        echo "IMAGE_NAME=$(echo '${{ github.repository }}/image' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+        echo "IMAGE_NAME2=$(echo '${{ github.repository }}/test' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
     - name: Log in to the Container registry
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
@@ -32,7 +35,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
       with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME | lower }}
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
     - name: Build and push Docker image
       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
@@ -47,7 +50,7 @@ jobs:
           BUILD_PYTHON=ON
 
     - name: Create Docker container
-      run: docker create --name extract-container ${{ env.REGISTRY }}/${{ env.IMAGE_NAME | lower }}:latest
+      run: docker create --name extract-container ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
     - name: Copy .so file from Docker container
       run: docker cp extract-container:/path/to/library.so ${{ github.workspace }}/library.so
@@ -67,6 +70,10 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
+    - name: Set environment variables
+      run: |
+        echo "IMAGE_NAME2=$(echo '${{ github.repository }}/test' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
     - name: Log in to the Container registry
       uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
       with:
@@ -78,7 +85,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
       with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME2 | lower }}
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME2 }}
 
     - name: Build and push Docker image
       uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
