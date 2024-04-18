@@ -11,8 +11,18 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/OmarSiwy/gRPCNvidia/test:main
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set ownership
+        run: |
+          # Workaround for https://github.com/actions/runner/issues/2033
+          chown -R $(id -u):$(id -g) $PWD
+
     - name: Checkout code
       uses: actions/checkout@v3
 
@@ -31,4 +41,4 @@ jobs:
 
     - name: Run Google Test
       run: |
-        docker run --name grpc_nvidia_test_container --rm grpc_nvidia_test:latest /bin/bash -c "cd build && ctest"
+        cd build && ctest
