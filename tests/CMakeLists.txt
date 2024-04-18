@@ -1,6 +1,6 @@
 enable_testing()
 
-file(GLOB TEST_SOURCES "*.cc" "*.cpp")
+file(GLOB_RECURSE TEST_SOURCES "*.cc" "*.cpp")
 add_executable(testexec ${TEST_SOURCES})
 
 target_link_libraries(testexec GTest::gtest_main)

@@ -18,3 +18,12 @@ services:
         BUILD_TESTS: "ON"
     container_name: grpc_nvidia_test
     command: /bin/bash -c "cd build && ctest"
+
+  extension:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_TESTS: "ON"
+        BUILD_PYTHON: "ON"
+    container_name: grpc_nvidia_test

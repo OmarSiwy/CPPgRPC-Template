@@ -7,15 +7,42 @@ enable_testing()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+
+option(BUILD_PYTHON "Build the Python bindings." OFF)
 option(BUILD_TESTS "Build the tests." ON)
 
-include_directories(inc)
-file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.cc")
+include_directories(inc) # Include
+file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.cc") # src files, except extension.cc
+set(TEST_SOURCES ${SOURCES})
+list(FILTER SOURCES EXCLUDE REGEX ".*extension\\.cc$")
 
-# Define the main executable
+# Python Specific Build Library
+if (BUILD_PYTHON)
+  set (Python_ADDITIONAL_VERSIONS 3)
+  find_package (PythonLibs REQUIRED)
+  find_package (PythonInterp REQUIRED)
+
+  include_directories("${PYTHON_INCLUDE_DIRS}")
+  list(FILTER TEST_SOURCES EXCLUDE REGEX ".*main\\.cc$")
+
+  add_library(core SHARED ${TEST_SOURCES})
+
+  set_target_properties(core PROPERTIES PREFIX "")
+  set_target_properties(core PROPERTIES OUTPUT_NAME "gRPCNvidia")
+
+  if (WIN32)
+    set_target_properties(core PROPERTIES SUFFIX ".pyd")
+  else()
+    set_target_properties(core PROPERTIES SUFFIX ".so")
+  endif()
+
+  target_link_libraries(core "${PYTHON_LIBRARIES}") # Link Python Libraries
+endif()
+
+# If building, this is the main executable
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-# Conditional test building
+# Conditional Testing
 if(BUILD_TESTS)
   # Add GoogleTest
   include(FetchContent)
