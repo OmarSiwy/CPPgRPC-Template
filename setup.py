@@ -1,14 +1,12 @@
 from setuptools import setup
 from pathlib import Path
 
-# List of all necessary files to include
 package_data = {
     'grpcnvidia': [
-        'build/gRPCNvidia.so'  # Include the shared library in the package
+        'build/gRPCNvidia.so'
     ],
 }
 
-# Define your Python package
 setup(
     name="gRPCNvidia",
     version="0.0.1",
