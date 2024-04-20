@@ -104,7 +104,7 @@ if(BUILD_SHARED_RPC)
 endif()
 
 if(BUILD_LIB_RPC)
-  add_library(${PROJECT_NAME} ${LIB_TYPE} ${GENERATED_SOURCES} ${GENERATED_HEADERS})
+  add_executable(${PROJECT_NAME} ${LIB_TYPE} ${GENERATED_SOURCES} ${GENERATED_HEADERS})
   target_link_libraries(${PROJECT_NAME} gRPC::grpc++ gRPC::grpc++_reflection protobuf::libprotobuf Threads::Threads)
 endif()
 # End of Get Proto Files ________________________________________________________________________________
@@ -117,6 +117,7 @@ if (BUILD_PYTHON_LIBS_RPC)
   find_package (PythonInterp REQUIRED)
 
   include_directories("${PYTHON_INCLUDE_DIRS}")
+  list(FILTER SOURCES EXCLUDE REGEX ".*main\\.cc$") # Remove main because we dont want an executable
 
   add_library(core SHARED ${PYTHON_SOURCES})
 
@@ -150,32 +151,3 @@ if(BUILD_TESTS_RPC)
   add_subdirectory(tests)
 endif()
 # End of Conditional Testing ________________________________________________________________________________
-
-
-# Package and Distribute ________________________________________________________________________________
-if(BUILD_LIB_RPC)
-  install(TARGETS ${PROJECT_NAME}
-    EXPORT ${PROJECT_NAME}Targets
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    RUNTIME DESTINATION bin
-    INCLUDES DESTINATION include
-  )
-  install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
-    DESTINATION include/${PROJECT_NAME}
-    FILES_MATCHING PATTERN "*.h"
-  )
-  include(CMakePackageConfigHelpers)
-  write_basic_package_version_file(
-    "${PROJECT_NAME}ConfigVersion.cmake"
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY AnyNewerVersion
-  )
-  install(EXPORT ${PROJECT_NAME}Targets
-    FILE ${PROJECT_NAME}Targets.cmake
-    NAMESPACE ${PROJECT_NAME}::
-    DESTINATION lib/cmake/${PROJECT_NAME}
-  )
-  export(TARGETS ${PROJECT_NAME} NAMESPACE ${PROJECT_NAME}:: FILE ${PROJECT_NAME}Targets.cmake)
-endif()
-# End of Package and Distribute ________________________________________________________________________________
